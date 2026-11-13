@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="seed">#2E7D32</color>
-    <color name="blocker_active">#2E7D32</color>
-    <color name="blocker_inactive">#B71C1C</color>
+    <color name="seed">#D4573B</color>
+    <color name="zen_ivory">#F9F6F0</color>
+    <color name="zen_terracotta">#D4573B</color>
+    <color name="zen_saffron">#E5A93C</color>
+    <color name="zen_sage">#2D6A4F</color>
+    <color name="zen_espresso">#1C1917</color>
+    <color name="blocker_active">#D4573B</color>
+    <color name="blocker_inactive">#78716C</color>
 </resources>

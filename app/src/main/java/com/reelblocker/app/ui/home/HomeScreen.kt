@@ -281,13 +281,15 @@ private fun HeroFocusProtectionCard(
     onSnoozeClick: () -> Unit,
     onResumeClick: () -> Unit
 ) {
-    val emeraldColor = Color(0xFF10B981)
-    val amberColor = Color(0xFFF59E0B)
-    val inactiveColor = Color(0xFF94A3B8)
+    val activeColor = MaterialTheme.colorScheme.primary
+    val snoozeColor = MaterialTheme.colorScheme.secondary
+    val scheduledColor = MaterialTheme.colorScheme.tertiary
+    val inactiveColor = MaterialTheme.colorScheme.outline
 
     val targetColor = when {
-        isSnoozed -> amberColor
-        isProtectionActive -> emeraldColor
+        isSnoozed -> snoozeColor
+        isProtectionActive && isScheduled -> scheduledColor
+        isProtectionActive -> activeColor
         else -> inactiveColor
     }
 
@@ -395,8 +397,8 @@ private fun HeroFocusProtectionCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(amberColor.copy(alpha = 0.15f))
-                                .border(1.dp, amberColor.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                                .background(snoozeColor.copy(alpha = 0.15f))
+                                .border(1.dp, snoozeColor.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
                                 .padding(horizontal = 14.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -405,7 +407,7 @@ private fun HeroFocusProtectionCard(
                                 Icon(
                                     imageVector = Icons.Filled.Timer,
                                     contentDescription = null,
-                                    tint = amberColor,
+                                    tint = snoozeColor,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -413,14 +415,14 @@ private fun HeroFocusProtectionCard(
                                     text = "Snoozed: $timeString remaining",
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = amberColor
+                                    color = snoozeColor
                                 )
                             }
 
                             Button(
                                 onClick = onResumeClick,
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = amberColor,
+                                    containerColor = snoozeColor,
                                     contentColor = Color.Black
                                 ),
                                 shape = RoundedCornerShape(12.dp),
@@ -825,10 +827,10 @@ private fun HomeStatusBadge(
 ) {
     val (label, bg, fg) = when {
         !isAccessibilityEnabled -> Triple("DISABLED", Color(0xFFEF4444).copy(alpha = 0.15f), Color(0xFFDC2626))
-        isSnoozed -> Triple("SNOOZED", Color(0xFFF59E0B).copy(alpha = 0.15f), Color(0xFFD97706))
-        isProtectionActive && isScheduled -> Triple("SCHEDULED", Color(0xFF0284C7).copy(alpha = 0.15f), Color(0xFF0284C7))
-        isProtectionActive -> Triple("ACTIVE", Color(0xFF10B981).copy(alpha = 0.15f), Color(0xFF059669))
-        else -> Triple("OFF", Color(0xFF94A3B8).copy(alpha = 0.15f), Color(0xFF64748B))
+        isSnoozed -> Triple("SNOOZED", MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.secondary)
+        isProtectionActive && isScheduled -> Triple("SCHEDULED", MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.tertiary)
+        isProtectionActive -> Triple("ACTIVE", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.primary)
+        else -> Triple("OFF", MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant)
     }
 
     Surface(

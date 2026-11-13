@@ -220,13 +220,13 @@ private fun FocusMasteryHeroCard(
 
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF10B981).copy(alpha = 0.18f)
+                    color = MaterialTheme.colorScheme.tertiaryContainer
                 ) {
                     Text(
                         text = "$cleanRate% Clean",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF047857),
+                        color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
@@ -458,8 +458,8 @@ private fun WeeklyCleanRateBarChartCard(
                                         } else if (cleanRate >= 80) {
                                             Brush.verticalGradient(
                                                 listOf(
-                                                    Color(0xFF10B981),
-                                                    Color(0xFF10B981).copy(alpha = 0.65f)
+                                                    MaterialTheme.colorScheme.secondary,
+                                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.65f)
                                                 )
                                             )
                                         } else {

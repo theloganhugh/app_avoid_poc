@@ -4,9 +4,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,23 +28,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -62,14 +60,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reelblocker.app.ui.dashboard.DashboardViewModel
-import java.time.LocalDateTime
+import kotlin.math.PI
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.roundToInt
+import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,18 +94,18 @@ fun ScheduleScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Top Bar
+        // Top App Bar
         TopAppBar(
             title = {
                 Column {
                     Text(
-                        text = "Focus Scheduler",
+                        text = "Focus Schedule",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = (-0.5).sp
                     )
                     Text(
-                        text = "Scheduled Habit Defense",
+                        text = "Automated Habit Boundaries",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -106,9 +115,9 @@ fun ScheduleScreen(
                 Surface(
                     shape = RoundedCornerShape(12.dp),
                     color = if (preferences.scheduleEnabled) {
-                        if (isCurrentlyActive) Color(0xFF10B981).copy(alpha = 0.18f) else Color(0xFF0284C7).copy(alpha = 0.18f)
+                        if (isCurrentlyActive) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer
                     } else {
-                        Color(0xFF94A3B8).copy(alpha = 0.18f)
+                        MaterialTheme.colorScheme.surfaceVariant
                     },
                     modifier = Modifier.padding(end = 16.dp)
                 ) {
@@ -117,8 +126,8 @@ fun ScheduleScreen(
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = if (preferences.scheduleEnabled) {
-                            if (isCurrentlyActive) Color(0xFF059669) else Color(0xFF0284C7)
-                        } else Color(0xFF64748B),
+                            if (isCurrentlyActive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
+                        } else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
@@ -146,8 +155,8 @@ fun ScheduleScreen(
                 onToggle = { viewModel.setScheduleEnabled(it) }
             )
 
-            // === 2. DEDICATED CUSTOM TIME SELECTION SECTION ===
-            InteractiveTimeSelectorCard(
+            // === 2. CIRCULAR FOCUS TIME DIAL (APPLE BEDTIME STYLE) ===
+            CircularFocusScheduleCard(
                 enabled = preferences.scheduleEnabled,
                 startHour = preferences.scheduleStartHour,
                 startMinute = preferences.scheduleStartMinute,
@@ -159,26 +168,25 @@ fun ScheduleScreen(
                 }
             )
 
-            // === 3. QUICK PRESETS ===
-            SchedulePresetsCard(
-                enabled = preferences.scheduleEnabled,
-                onSelectPreset = { sH, sM, eH, eM ->
-                    viewModel.setScheduleTime(sH, sM, eH, eM)
-                }
-            )
-
-            // === 4. ACTIVE DAYS OF THE WEEK ===
-            ActiveDaysCard(
+            // === 3. DAY SELECTOR (MINIMALIST PILLS: mo tu we th fr sa su) ===
+            CircularDaysCard(
                 enabled = preferences.scheduleEnabled,
                 scheduleDays = preferences.scheduleDays,
                 onToggleDay = { viewModel.toggleScheduleDay(it) },
                 onSelectPresetDays = { days ->
-                    // Set all days
                     days.forEach { day ->
                         if (!preferences.scheduleDays.contains(day)) {
                             viewModel.toggleScheduleDay(day)
                         }
                     }
+                }
+            )
+
+            // === 4. QUICK PRESETS ===
+            SchedulePresetsCard(
+                enabled = preferences.scheduleEnabled,
+                onSelectPreset = { sH, sM, eH, eM ->
+                    viewModel.setScheduleTime(sH, sM, eH, eM)
                 }
             )
 
@@ -204,14 +212,14 @@ private fun ScheduleMasterCard(
     endMinute: Int,
     onToggle: (Boolean) -> Unit
 ) {
-    val emeraldColor = Color(0xFF10B981)
-    val skyColor = Color(0xFF0284C7)
-    val inactiveColor = Color(0xFF94A3B8)
+    val activeColor = MaterialTheme.colorScheme.tertiary
+    val scheduledColor = MaterialTheme.colorScheme.primary
+    val inactiveColor = MaterialTheme.colorScheme.outline
 
     val accentColor = when {
         !scheduleEnabled -> inactiveColor
-        isCurrentlyActive -> emeraldColor
-        else -> skyColor
+        isCurrentlyActive -> activeColor
+        else -> scheduledColor
     }
 
     Card(
@@ -267,8 +275,8 @@ private fun ScheduleMasterCard(
                         )
                         Text(
                             text = if (scheduleEnabled) {
-                                if (isCurrentlyActive) "Focus hours locked until ${formatTime(endHour, endMinute)}"
-                                else "Next window: ${formatTime(startHour, startMinute)}"
+                                if (isCurrentlyActive) "Focus locked until ${formatHourMinute(endHour, endMinute)}"
+                                else "Next window: ${formatHourMinute(startHour, startMinute)}"
                             } else "Enable to automate your focus hours",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -292,15 +300,15 @@ private fun ScheduleMasterCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
-                        .background(emeraldColor.copy(alpha = 0.12f))
-                        .border(1.dp, emeraldColor.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
+                        .background(activeColor.copy(alpha = 0.12f))
+                        .border(1.dp, activeColor.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
                         .padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Shield,
                         contentDescription = null,
-                        tint = emeraldColor,
+                        tint = activeColor,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
@@ -308,7 +316,7 @@ private fun ScheduleMasterCard(
                         text = "Focus Shield is currently active on your phone.",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF047857)
+                        color = activeColor
                     )
                 }
             }
@@ -317,11 +325,11 @@ private fun ScheduleMasterCard(
 }
 
 // =============================================================================
-// 2. DEDICATED CUSTOM TIME SELECTION (IMPROVED TIME SELECTION)
+// 2. CIRCULAR FOCUS TIME DIAL (APPLE BEDTIME STYLE)
 // =============================================================================
 
 @Composable
-private fun InteractiveTimeSelectorCard(
+private fun CircularFocusScheduleCard(
     enabled: Boolean,
     startHour: Int,
     startMinute: Int,
@@ -330,296 +338,320 @@ private fun InteractiveTimeSelectorCard(
     durationHours: Float,
     onTimeChange: (Int, Int, Int, Int) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-        )
-    ) {
-        Column(modifier = Modifier.padding(18.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.Schedule,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Custom Focus Hours",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-                ) {
-                    Text(
-                        text = "${String.format("%.1f", durationHours)} hrs/day",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // START TIME CONTROLLER
-            TimeBlockController(
-                title = "START TIME",
-                hour = startHour,
-                minute = startMinute,
-                enabled = enabled,
-                onHourChange = { newHour ->
-                    onTimeChange(newHour, startMinute, endHour, endMinute)
-                },
-                onMinuteChange = { newMinute ->
-                    onTimeChange(startHour, newMinute, endHour, endMinute)
-                }
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Flow indicator between Start and End
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowForward,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // END TIME CONTROLLER
-            TimeBlockController(
-                title = "END TIME",
-                hour = endHour,
-                minute = endMinute,
-                enabled = enabled,
-                onHourChange = { newHour ->
-                    onTimeChange(startHour, startMinute, newHour, endMinute)
-                },
-                onMinuteChange = { newMinute ->
-                    onTimeChange(startHour, startMinute, endHour, newMinute)
-                }
-            )
-        }
-    }
-}
-
-@Composable
-private fun TimeBlockController(
-    title: String,
-    hour: Int,
-    minute: Int,
-    enabled: Boolean,
-    onHourChange: (Int) -> Unit,
-    onMinuteChange: (Int) -> Unit
-) {
-    val displayHour = if (hour == 0) 12 else if (hour > 12) hour - 12 else hour
-    val isPm = hour >= 12
+    // Mode for precision stepper: 0 = adjust Start, 1 = adjust End
+    var activeAdjustTarget by remember { mutableIntStateOf(0) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(26.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                letterSpacing = 1.sp
-            )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // === CIRCULAR DIAL ===
+            Box(
+                modifier = Modifier
+                    .size(260.dp)
+                    .padding(10.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // Compose Canvas for Background Track, Active Arc, and Tick Marks
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val strokeWidthPx = 22.dp.toPx()
+                    val diameter = size.minDimension - strokeWidthPx
+                    val radius = diameter / 2f
+                    val arcTopLeft = Offset(
+                        (size.width - diameter) / 2f,
+                        (size.height - diameter) / 2f
+                    )
+                    val arcSize = Size(diameter, diameter)
 
-            Spacer(modifier = Modifier.height(10.dp))
+                    // 1. Inactive Background Track (Light Gray)
+                    drawArc(
+                        color = Color(0xFFF1F5F9),
+                        startAngle = 0f,
+                        sweepAngle = 360f,
+                        useCenter = false,
+                        topLeft = arcTopLeft,
+                        size = arcSize,
+                        style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
+                    )
 
+                    // Calculate Angles for 24-hour dial (00:00 at -90 deg / Top)
+                    val startAngle = -90f + ((startHour * 60 + startMinute) / (24f * 60f)) * 360f
+                    val endAngle = -90f + ((endHour * 60 + endMinute) / (24f * 60f)) * 360f
+                    val sweepAngle = if (endAngle >= startAngle) {
+                        endAngle - startAngle
+                    } else {
+                        (360f - startAngle) + endAngle
+                    }
+
+                    // 2. Active Focus Arc (Dark Sleek Slate #1E293B)
+                    drawArc(
+                        color = if (enabled) Color(0xFF0F172A) else Color(0xFF94A3B8),
+                        startAngle = startAngle,
+                        sweepAngle = sweepAngle,
+                        useCenter = false,
+                        topLeft = arcTopLeft,
+                        size = arcSize,
+                        style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
+                    )
+
+                    // 3. Bezel Tick Marks along the active arc
+                    val tickCount = (sweepAngle / 4.5f).toInt().coerceAtLeast(1)
+                    for (i in 0..tickCount) {
+                        val angleDeg = startAngle + (i * 4.5f)
+                        val angleRad = Math.toRadians(angleDeg.toDouble())
+                        val rInner = radius - (strokeWidthPx / 2f) + 4.dp.toPx()
+                        val rOuter = radius + (strokeWidthPx / 2f) - 4.dp.toPx()
+
+                        val x1 = center.x + (rInner * cos(angleRad)).toFloat()
+                        val y1 = center.y + (rInner * sin(angleRad)).toFloat()
+                        val x2 = center.x + (rOuter * cos(angleRad)).toFloat()
+                        val y2 = center.y + (rOuter * sin(angleRad)).toFloat()
+
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.28f),
+                            start = Offset(x1, y1),
+                            end = Offset(x2, y2),
+                            strokeWidth = 1.4.dp.toPx()
+                        )
+                    }
+
+                    // 4. Start Knob Indicator (Bedtime / Shield)
+                    val startRad = Math.toRadians(startAngle.toDouble())
+                    val startKnobCenter = Offset(
+                        center.x + (radius * cos(startRad)).toFloat(),
+                        center.y + (radius * sin(startRad)).toFloat()
+                    )
+                    drawCircle(
+                        color = Color.White,
+                        radius = 16.dp.toPx(),
+                        center = startKnobCenter
+                    )
+                    drawCircle(
+                        color = Color(0xFF0F172A),
+                        radius = 16.dp.toPx(),
+                        center = startKnobCenter,
+                        style = Stroke(width = 1.5.dp.toPx())
+                    )
+
+                    // 5. End Knob Indicator (Sun / Wake up)
+                    val endRad = Math.toRadians(endAngle.toDouble())
+                    val endKnobCenter = Offset(
+                        center.x + (radius * cos(endRad)).toFloat(),
+                        center.y + (radius * sin(endRad)).toFloat()
+                    )
+                    drawCircle(
+                        color = Color.White,
+                        radius = 16.dp.toPx(),
+                        center = endKnobCenter
+                    )
+                    drawCircle(
+                        color = Color(0xFFEAB308),
+                        radius = 16.dp.toPx(),
+                        center = endKnobCenter,
+                        style = Stroke(width = 1.5.dp.toPx())
+                    )
+                }
+
+                // Inner Typography Stack (Centered in the Dial)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    // Start Time (Clickable)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (activeAdjustTarget == 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                                else Color.Transparent
+                            )
+                            .clickable(enabled = enabled) { activeAdjustTarget = 0 }
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Filled.Bedtime,
+                                contentDescription = null,
+                                modifier = Modifier.size(13.dp),
+                                tint = Color(0xFF64748B)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "focus start",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF64748B),
+                                fontSize = 11.sp
+                            )
+                        }
+                        Text(
+                            text = String.format("%02d:%02d", startHour, startMinute),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = if (activeAdjustTarget == 0) MaterialTheme.colorScheme.primary else Color(0xFF0F172A),
+                            letterSpacing = (-0.5).sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Duration Label
+                    Text(
+                        text = "${String.format("%.1f", durationHours)} hours of focus",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFF94A3B8),
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 11.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // End Time (Clickable)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (activeAdjustTarget == 1) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                                else Color.Transparent
+                            )
+                            .clickable(enabled = enabled) { activeAdjustTarget = 1 }
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = String.format("%02d:%02d", endHour, endMinute),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = if (activeAdjustTarget == 1) MaterialTheme.colorScheme.primary else Color(0xFF0F172A),
+                            letterSpacing = (-0.5).sp
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Filled.WbSunny,
+                                contentDescription = null,
+                                modifier = Modifier.size(13.dp),
+                                tint = Color(0xFFEAB308)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "focus end",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF64748B),
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Precision Stepper Row for Currently Selected Target (Start or End)
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFFF8FAFC))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Hour Controller
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    IconButton(
-                        onClick = {
-                            var h = hour - 1
-                            if (h < 0) h = 23
-                            onHourChange(h)
-                        },
-                        enabled = enabled,
-                        modifier = Modifier.size(34.dp)
-                    ) {
-                        Icon(imageVector = Icons.Filled.Remove, contentDescription = "Decrease Hour", modifier = Modifier.size(18.dp))
-                    }
-
-                    Text(
-                        text = String.format("%02d", displayHour),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    IconButton(
-                        onClick = {
-                            var h = hour + 1
-                            if (h > 23) h = 0
-                            onHourChange(h)
-                        },
-                        enabled = enabled,
-                        modifier = Modifier.size(34.dp)
-                    ) {
-                        Icon(imageVector = Icons.Filled.Add, contentDescription = "Increase Hour", modifier = Modifier.size(18.dp))
-                    }
-                }
-
                 Text(
-                    text = ":",
-                    style = MaterialTheme.typography.headlineMedium,
+                    text = if (activeAdjustTarget == 0) "Adjusting Start Time" else "Adjusting End Time",
+                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.primary
                 )
 
-                // Minute Controller
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    IconButton(
+                    // -1 Hour
+                    OutlinedButton(
                         onClick = {
-                            val newMin = if (minute <= 0) 45 else minute - 15
-                            onMinuteChange(newMin)
+                            if (activeAdjustTarget == 0) {
+                                val newH = if (startHour <= 0) 23 else startHour - 1
+                                onTimeChange(newH, startMinute, endHour, endMinute)
+                            } else {
+                                val newH = if (endHour <= 0) 23 else endHour - 1
+                                onTimeChange(startHour, startMinute, newH, endMinute)
+                            }
                         },
                         enabled = enabled,
-                        modifier = Modifier.size(34.dp)
-                    ) {
-                        Icon(imageVector = Icons.Filled.Remove, contentDescription = "Decrease Minute", modifier = Modifier.size(18.dp))
-                    }
-
-                    Text(
-                        text = String.format("%02d", minute),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    IconButton(
-                        onClick = {
-                            val newMin = if (minute >= 45) 0 else minute + 15
-                            onMinuteChange(newMin)
-                        },
-                        enabled = enabled,
-                        modifier = Modifier.size(34.dp)
-                    ) {
-                        Icon(imageVector = Icons.Filled.Add, contentDescription = "Increase Minute", modifier = Modifier.size(18.dp))
-                    }
-                }
-
-                // AM / PM Segmented Toggle
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .padding(3.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(9.dp))
-                            .background(if (!isPm) MaterialTheme.colorScheme.primary else Color.Transparent)
-                            .clickable(enabled = enabled) {
-                                if (isPm) onHourChange(hour - 12)
-                            }
-                            .padding(horizontal = 10.dp, vertical = 6.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "AM",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = if (!isPm) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(9.dp))
-                            .background(if (isPm) MaterialTheme.colorScheme.primary else Color.Transparent)
-                            .clickable(enabled = enabled) {
-                                if (!isPm) onHourChange(hour + 12)
-                            }
-                            .padding(horizontal = 10.dp, vertical = 6.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "PM",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isPm) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Quick minute chips (:00, :15, :30, :45)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                listOf(0, 15, 30, 45).forEach { m ->
-                    val isSelected = (minute == m)
-                    Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent,
-                        border = BorderStroke(
-                            1.dp,
-                            if (isSelected) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.outlineVariant
-                        ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable(enabled = enabled) { onMinuteChange(m) }
+                        contentPadding = ButtonDefaults.TextButtonContentPadding,
+                        modifier = Modifier.height(32.dp)
                     ) {
-                        Text(
-                            text = ":${String.format("%02d", m)}",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(vertical = 6.dp)
-                        )
+                        Text("-1h", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    // -15 Min
+                    OutlinedButton(
+                        onClick = {
+                            if (activeAdjustTarget == 0) {
+                                val newM = if (startMinute < 15) 45 else startMinute - 15
+                                onTimeChange(startHour, newM, endHour, endMinute)
+                            } else {
+                                val newM = if (endMinute < 15) 45 else endMinute - 15
+                                onTimeChange(startHour, startMinute, endHour, newM)
+                            }
+                        },
+                        enabled = enabled,
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = ButtonDefaults.TextButtonContentPadding,
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Text("-15m", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    // +15 Min
+                    OutlinedButton(
+                        onClick = {
+                            if (activeAdjustTarget == 0) {
+                                val newM = if (startMinute >= 45) 0 else startMinute + 15
+                                onTimeChange(startHour, newM, endHour, endMinute)
+                            } else {
+                                val newM = if (endMinute >= 45) 0 else endMinute + 15
+                                onTimeChange(startHour, startMinute, endHour, newM)
+                            }
+                        },
+                        enabled = enabled,
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = ButtonDefaults.TextButtonContentPadding,
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Text("+15m", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    // +1 Hour
+                    OutlinedButton(
+                        onClick = {
+                            if (activeAdjustTarget == 0) {
+                                val newH = if (startHour >= 23) 0 else startHour + 1
+                                onTimeChange(newH, startMinute, endHour, endMinute)
+                            } else {
+                                val newH = if (endHour >= 23) 0 else endHour + 1
+                                onTimeChange(startHour, startMinute, newH, endMinute)
+                            }
+                        },
+                        enabled = enabled,
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = ButtonDefaults.TextButtonContentPadding,
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Text("+1h", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -628,7 +660,107 @@ private fun TimeBlockController(
 }
 
 // =============================================================================
-// 3. QUICK PRESETS
+// 3. MINIMALIST DAYS SELECTOR (EXACT STYLE: mo tu we th fr sa su)
+// =============================================================================
+
+@Composable
+private fun CircularDaysCard(
+    enabled: Boolean,
+    scheduleDays: Set<Int>,
+    onToggleDay: (Int) -> Unit,
+    onSelectPresetDays: (Set<Int>) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp)
+        ) {
+            Text(
+                text = "Active Days",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF64748B)
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // 7 Days row in exact Image 2 style: mo tu we th fr sa su
+            val days = listOf(
+                1 to "mo",
+                2 to "tu",
+                3 to "we",
+                4 to "th",
+                5 to "fr",
+                6 to "sa",
+                7 to "su"
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                days.forEach { (dayInt, label) ->
+                    val isSelected = scheduleDays.contains(dayInt)
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (isSelected) Color(0xFF0F172A)
+                                else Color(0xFFF1F5F9)
+                            )
+                            .clickable(enabled = enabled) { onToggleDay(dayInt) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isSelected) Color.White else Color(0xFF64748B),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Quick days filters
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { onSelectPresetDays(setOf(1, 2, 3, 4, 5)) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Weekdays (mo-fr)", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                }
+
+                OutlinedButton(
+                    onClick = { onSelectPresetDays(setOf(1, 2, 3, 4, 5, 6, 7)) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Everyday (7 days)", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
+    }
+}
+
+// =============================================================================
+// 4. QUICK PRESETS
 // =============================================================================
 
 @Composable
@@ -652,10 +784,10 @@ private fun SchedulePresetsCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             val presets = listOf(
-                Triple("Workday (9 AM - 5 PM)", "Standard 8-hour workday focus", listOf(9, 0, 17, 0)),
-                Triple("Deep Work (10 AM - 1 PM)", "High-intensity morning block", listOf(10, 0, 13, 0)),
-                Triple("Night Guard (10 PM - 7 AM)", "No midnight doomscrolling", listOf(22, 0, 7, 0)),
-                Triple("All Day Shield (8 AM - 10 PM)", "Comprehensive daytime guard", listOf(8, 0, 22, 0))
+                Triple("Workday (09:00 - 17:00)", "Standard 8-hour workday focus", listOf(9, 0, 17, 0)),
+                Triple("Deep Work (10:00 - 13:00)", "High-intensity morning block", listOf(10, 0, 13, 0)),
+                Triple("Night Guard (22:00 - 07:00)", "No midnight doomscrolling", listOf(22, 0, 7, 0)),
+                Triple("All Day Shield (08:00 - 22:00)", "Comprehensive daytime guard", listOf(8, 0, 22, 0))
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -699,97 +831,6 @@ private fun SchedulePresetsCard(
                             )
                         }
                     }
-                }
-            }
-        }
-    }
-}
-
-// =============================================================================
-// 4. ACTIVE DAYS OF THE WEEK
-// =============================================================================
-
-@Composable
-private fun ActiveDaysCard(
-    enabled: Boolean,
-    scheduleDays: Set<Int>,
-    onToggleDay: (Int) -> Unit,
-    onSelectPresetDays: (Set<Int>) -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Active Days",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            val days = listOf(
-                1 to "M",
-                2 to "T",
-                3 to "W",
-                4 to "T",
-                5 to "F",
-                6 to "S",
-                7 to "S"
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                days.forEach { (dayInt, label) ->
-                    val isSelected = scheduleDays.contains(dayInt)
-                    Box(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.surfaceVariant
-                            )
-                            .clickable(enabled = enabled) { onToggleDay(dayInt) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Quick days filters
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(
-                    onClick = { onSelectPresetDays(setOf(1, 2, 3, 4, 5)) },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Mon-Fri", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                }
-
-                OutlinedButton(
-                    onClick = { onSelectPresetDays(setOf(1, 2, 3, 4, 5, 6, 7)) },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Everyday", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -847,7 +888,7 @@ private fun FocusScienceCard() {
     }
 }
 
-private fun formatTime(hour: Int, minute: Int): String {
+private fun formatHourMinute(hour: Int, minute: Int): String {
     val displayHour = if (hour == 0) 12 else if (hour > 12) hour - 12 else hour
     val amPm = if (hour < 12) "AM" else "PM"
     return String.format("%02d:%02d %s", displayHour, minute, amPm)

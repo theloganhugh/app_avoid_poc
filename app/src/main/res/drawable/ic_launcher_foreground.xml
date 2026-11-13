@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- ================================================================= -->
+    <!-- MINIMALIST ZEN BALANCE SCULPTURE                                  -->
+    <!-- Only the Celestial Sphere balanced on the Saffron Crescent Bowl    -->
+    <!-- ================================================================= -->
+
+    <!-- 1. TOP CELESTIAL ORB (Burnt Terracotta Sun / Awakened Focus)      -->
+    <!-- Radius 11.5dp, centered at (54, 42)                                -->
+    <path
+        android:pathData="M54,42m-11.5,0a11.5,11.5 0 1,0 23,0a11.5,11.5 0 1,0 -23,0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="51"
+                android:centerY="39"
+                android:gradientRadius="12">
+                <item android:color="#FFE86847" android:offset="0.0" />
+                <item android:color="#FFD94E2C" android:offset="0.6" />
+                <item android:color="#FFB53617" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 2. MIDDLE BALANCED CRESCENT BOWL (Warm Saffron / Golden Amber)    -->
+    <!-- Top line from (30, 54) to (78, 54), curving down to (54, 73)      -->
+    <path
+        android:pathData="M30,54 L78,54 A24,19 0 0,1 30,54 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="54"
+                android:startY="54"
+                android:endX="54"
+                android:endY="73">
+                <item android:color="#FFF5BE42" android:offset="0.0" />
+                <item android:color="#FFE5A328" android:offset="0.5" />
+                <item android:color="#FFC88716" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Subtle soft contact shadow under the sphere resting on the bowl -->
+    <path
+        android:pathData="M54,54.5m-5,0a5,1.2 0 1,0 10,0a5,1.2 0 1,0 -10,0"
+        android:fillColor="#30000000" />
+
+</vector>
