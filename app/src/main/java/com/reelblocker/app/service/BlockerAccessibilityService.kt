@@ -44,6 +44,10 @@ class BlockerAccessibilityService : AccessibilityService() {
     private var lastAppSessionPackage: String? = null
     private var lastAppSessionTimeMs = 0L
 
+    // Direct Message session & transition tracking to permit viewing reels sent in chat
+    private var lastDirectMessageTimeMs = 0L
+    private var isViewingReelFromChat = false
+
     override fun onCreate() {
         super.onCreate()
         preferencesRepository = UserPreferencesRepository(applicationContext)
@@ -106,18 +110,28 @@ class BlockerAccessibilityService : AccessibilityService() {
     // =========================================================================
 
     private fun handleInstagramEvent(rootNode: AccessibilityNodeInfo) {
+        val currentTime = System.currentTimeMillis()
+
         // 1. SAFETY FIRST: If user is anywhere inside Direct Messages/Chat, NEVER block!
+        // Record timestamp so that if the user taps on a Reel shared in this chat,
+        // we detect the transition and allow full viewing without deflection.
         if (isInsideInstagramDirectMessage(rootNode)) {
+            lastDirectMessageTimeMs = currentTime
+            isViewingReelFromChat = false
             return
         }
 
-        // 2. SAFETY: If user is on the Profile page, NEVER block!
-        if (isInstagramProfileTabSelected(rootNode)) {
+        // 2. SAFETY & RESET: If user is on the Home Feed or Profile page, reset chat-reel state
+        if (isInstagramFeedTabSelected(rootNode) || isInstagramProfileTabSelected(rootNode)) {
+            lastDirectMessageTimeMs = 0L
+            isViewingReelFromChat = false
             return
         }
 
         // 3. TARGET: Check if the dedicated "Reels" bottom navigation tab is selected
         if (currentPreferences.blockInstagramReels && isInstagramReelsTabSelected(rootNode)) {
+            lastDirectMessageTimeMs = 0L
+            isViewingReelFromChat = false
             val redirected = redirectToInstagramHomeTab(rootNode)
             if (redirected) {
                 incrementBlockedCountAsync()
@@ -128,6 +142,8 @@ class BlockerAccessibilityService : AccessibilityService() {
 
         // 4. TARGET: Check if the "Explore" (Search & Explore) bottom tab is selected
         if (currentPreferences.blockInstagramExplore && isInstagramExploreTabSelected(rootNode)) {
+            lastDirectMessageTimeMs = 0L
+            isViewingReelFromChat = false
             val redirected = redirectToInstagramHomeTab(rootNode)
             if (redirected) {
                 incrementBlockedCountAsync()
@@ -136,9 +152,22 @@ class BlockerAccessibilityService : AccessibilityService() {
             }
         }
 
-        // 5. TARGET: Check if full-screen Reels player is active outside of DMs
+        // 5. TARGET: Check if full-screen Reels player is active
         if (currentPreferences.blockInstagramReels && isInstagramClipsViewerActive(rootNode)) {
-            val currentTime = System.currentTimeMillis()
+            // Check if this Reel was opened from a Direct Message (chat conversation)
+            val timeSinceChatMs = currentTime - lastDirectMessageTimeMs
+            val cameFromChat = (lastDirectMessageTimeMs > 0L && timeSinceChatMs < 5000L) ||
+                    isViewingReelFromChat ||
+                    hasDirectChatReplyBar(rootNode)
+
+            if (cameFromChat) {
+                // User intentionally opened a Reel shared by a friend in chat -> ALLOW viewing!
+                isViewingReelFromChat = true
+                Log.d(Constants.LOG_TAG, "Permitted Instagram Reel playback: opened from Direct Message (Δt=${timeSinceChatMs}ms)")
+                return
+            }
+
+            // Otherwise, it was opened from Home feed algorithmic reel card or notification -> BLOCK!
             if (currentTime - lastBlockTimeMs >= 500L) {
                 lastBlockTimeMs = currentTime
                 // Try redirecting to Home first; if not in tab bar, press Back
@@ -146,7 +175,7 @@ class BlockerAccessibilityService : AccessibilityService() {
                     performGlobalAction(GLOBAL_ACTION_BACK)
                 }
                 incrementBlockedCountAsync()
-                Log.d(Constants.LOG_TAG, "Exited Instagram full-screen Reels viewer")
+                Log.d(Constants.LOG_TAG, "Exited Instagram full-screen Reels viewer (algorithmic)")
             }
         }
     }
@@ -163,7 +192,9 @@ class BlockerAccessibilityService : AccessibilityService() {
             "com.instagram.android:id/thread_title",
             "com.instagram.android:id/direct_text_message_text_view",
             "com.instagram.android:id/voice_message_recording_view",
-            "com.instagram.android:id/direct_media_preview_container"
+            "com.instagram.android:id/direct_media_preview_container",
+            "com.instagram.android:id/direct_unified_inbox",
+            "com.instagram.android:id/layout_comment_thread"
         )
 
         for (viewId in dmViewIds) {
@@ -174,6 +205,47 @@ class BlockerAccessibilityService : AccessibilityService() {
             }
         }
         return false
+    }
+
+    /**
+     * Checks if the active Clips Viewer contains a Direct Message reply bar
+     * (e.g. "Reply to [Friend]..."), which confirms this Reel was opened from a DM thread.
+     */
+    private fun hasDirectChatReplyBar(rootNode: AccessibilityNodeInfo): Boolean {
+        val replyViewIds = listOf(
+            "com.instagram.android:id/direct_reply_composer",
+            "com.instagram.android:id/direct_reply_edit_text",
+            "com.instagram.android:id/direct_reply_bar",
+            "com.instagram.android:id/direct_private_reply",
+            "com.instagram.android:id/layout_direct_reply",
+            "com.instagram.android:id/direct_thread_reply_bar",
+            "com.instagram.android:id/direct_send_button",
+            "com.instagram.android:id/clips_reply_bar",
+            "com.instagram.android:id/direct_in_clips_reply_bar"
+        )
+        for (viewId in replyViewIds) {
+            val nodes = rootNode.findAccessibilityNodeInfosByViewId(viewId)
+            if (!nodes.isNullOrEmpty()) {
+                nodes.forEach { safeRecycle(it) }
+                return true
+            }
+        }
+        return false
+    }
+
+    /**
+     * Checks if the "Home" feed bottom tab is currently selected.
+     */
+    private fun isInstagramFeedTabSelected(rootNode: AccessibilityNodeInfo): Boolean {
+        val feedTabNodes = rootNode.findAccessibilityNodeInfosByViewId("com.instagram.android:id/feed_tab")
+        if (!feedTabNodes.isNullOrEmpty()) {
+            for (node in feedTabNodes) {
+                val selected = node.isSelected
+                safeRecycle(node)
+                if (selected) return true
+            }
+        }
+        return isBottomNavigationTabSelected(rootNode, listOf("Home", "Feed"))
     }
 
     /**
