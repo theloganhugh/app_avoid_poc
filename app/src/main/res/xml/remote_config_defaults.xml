@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>youtube_shorts_view_ids</key>
+        <value>["com.google.android.youtube:id/reel_recycler","com.google.android.youtube:id/reel_player_page_container","com.google.android.youtube:id/shorts_player_container"]</value>
+    </entry>
+    <entry>
+        <key>instagram_reels_view_ids</key>
+        <value>["com.instagram.android:id/clips_viewer_view_pager","com.instagram.android:id/clips_video_container"]</value>
+    </entry>
+    <entry>
+        <key>block_cooldown_ms</key>
+        <value>800</value>
+    </entry>
+    <entry>
+        <key>kill_switch</key>
+        <value>false</value>
+    </entry>
+</defaultsMap>

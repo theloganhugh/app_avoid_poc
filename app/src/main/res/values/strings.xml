@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ReelBlocker</string>
+    <string name="accessibility_service_description">ReelBlocker monitors Instagram and YouTube to detect when short-form video players (Reels and Shorts) are active. When detected, it automatically navigates you away from the player. No personal data is collected, stored, or transmitted. This service only inspects screen elements within Instagram and YouTube apps.</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">ReelBlocker</string>
+    <string name="master_toggle_label">Content Blocker</string>
+    <string name="master_toggle_on">Active — blocking short-form content</string>
+    <string name="master_toggle_off">Inactive — all content allowed</string>
+    <string name="instagram_reels_label">Instagram Reels</string>
+    <string name="instagram_explore_label">Instagram Explore Feed</string>
+    <string name="youtube_shorts_label">YouTube Shorts</string>
+    <string name="blocked_today">Blocked Today</string>
+    <string name="service_status_enabled">Accessibility Service is enabled</string>
+    <string name="service_status_disabled">Accessibility Service is disabled — tap to enable</string>
+
+    <!-- Prominent Disclosure -->
+    <string name="disclosure_title">Important Privacy Information</string>
+    <string name="disclosure_body">This app uses Android\'s Accessibility Service to monitor screen content exclusively within Instagram and YouTube apps.\n\nWhat it does:\n• Detects when Reels or Shorts players are active\n• Automatically navigates you away from short-form content\n\nWhat it does NOT do:\n• Collect, store, or transmit any personal data\n• Access any app other than Instagram and YouTube\n• Read your messages, passwords, or private information\n\nAll processing happens locally on your device.</string>
+    <string name="disclosure_agree">I Understand &amp; Agree</string>
+    <string name="disclosure_cancel">Cancel</string>
+
+    <!-- Battery Optimization -->
+    <string name="battery_optimization_title">Battery Optimization</string>
+    <string name="battery_optimization_warning">Battery optimization may stop the blocker from running. Tap to disable it for this app.</string>
+</resources>

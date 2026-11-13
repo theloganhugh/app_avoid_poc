@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1055422822014",
+    "project_id": "reel-blocker-9cf74",
+    "storage_bucket": "reel-blocker-9cf74.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1055422822014:android:fc3934d3f801f0f73b4a2f",
+        "android_client_info": {
+          "package_name": "com.reelblocker.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxBW2Wvq_-v4ZImbNlGp4fEemhqkloQuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
