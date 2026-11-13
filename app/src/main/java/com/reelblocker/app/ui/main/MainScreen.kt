@@ -49,6 +49,11 @@ import com.reelblocker.app.ui.analytics.AnalyticsScreen
 import com.reelblocker.app.ui.dashboard.DashboardViewModel
 import com.reelblocker.app.ui.home.HomeScreen
 import com.reelblocker.app.ui.schedule.ScheduleScreen
+import com.reelblocker.app.ui.theme.ColorMatteCharcoal
+import com.reelblocker.app.ui.theme.ColorSoftSand
+import com.reelblocker.app.ui.theme.ColorTerracotta
+import com.reelblocker.app.ui.theme.ColorTerracottaWash
+import com.reelblocker.app.ui.theme.ColorWarmOffWhite
 
 enum class MainTab(val title: String) {
     HOME("Home"),
@@ -70,8 +75,8 @@ fun MainScreen(viewModel: DashboardViewModel) {
     Scaffold(
         bottomBar = {
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                tonalElevation = 8.dp
+                containerColor = ColorWarmOffWhite,
+                tonalElevation = 0.dp
             ) {
                 // TAB 1: HOME
                 NavigationBarItem(
@@ -83,21 +88,13 @@ fun MainScreen(viewModel: DashboardViewModel) {
                                 imageVector = if (selectedTab == 0) Icons.Filled.Shield else Icons.Outlined.Shield,
                                 contentDescription = "Home"
                             )
-                            if (!isAccessibilityEnabled) {
+                            if (!isAccessibilityEnabled || preferences.isProtectionActive) {
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
                                         .size(8.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFFEF4444))
-                                )
-                            } else if (preferences.isProtectionActive) {
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(Color(0xFF10B981))
+                                        .background(ColorTerracotta)
                                 )
                             }
                         }
@@ -110,9 +107,11 @@ fun MainScreen(viewModel: DashboardViewModel) {
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                        selectedIconColor = ColorTerracotta,
+                        selectedTextColor = ColorTerracotta,
+                        unselectedIconColor = ColorMatteCharcoal.copy(alpha = 0.65f),
+                        unselectedTextColor = ColorMatteCharcoal.copy(alpha = 0.65f),
+                        indicatorColor = ColorTerracottaWash
                     )
                 )
 
@@ -132,7 +131,7 @@ fun MainScreen(viewModel: DashboardViewModel) {
                                         .align(Alignment.TopEnd)
                                         .size(8.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFF0284C7))
+                                        .background(ColorTerracotta)
                                 )
                             }
                         }
@@ -145,9 +144,11 @@ fun MainScreen(viewModel: DashboardViewModel) {
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                        selectedIconColor = ColorTerracotta,
+                        selectedTextColor = ColorTerracotta,
+                        unselectedIconColor = ColorMatteCharcoal.copy(alpha = 0.65f),
+                        unselectedTextColor = ColorMatteCharcoal.copy(alpha = 0.65f),
+                        indicatorColor = ColorTerracottaWash
                     )
                 )
 
@@ -169,9 +170,11 @@ fun MainScreen(viewModel: DashboardViewModel) {
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                        selectedIconColor = ColorTerracotta,
+                        selectedTextColor = ColorTerracotta,
+                        unselectedIconColor = ColorMatteCharcoal.copy(alpha = 0.65f),
+                        unselectedTextColor = ColorMatteCharcoal.copy(alpha = 0.65f),
+                        indicatorColor = ColorTerracottaWash
                     )
                 )
             }

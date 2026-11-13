@@ -69,6 +69,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reelblocker.app.ui.components.ProminentDisclosureDialog
 import com.reelblocker.app.ui.dashboard.DashboardViewModel
+import com.reelblocker.app.ui.theme.ColorDeepHoneyOchre
+import com.reelblocker.app.ui.theme.ColorHoneyOchre
+import com.reelblocker.app.ui.theme.ColorHoneyOchreWash
+import com.reelblocker.app.ui.theme.ColorMatteCharcoal
+import com.reelblocker.app.ui.theme.ColorSoftSand
+import com.reelblocker.app.ui.theme.ColorSoftSandWash
+import com.reelblocker.app.ui.theme.ColorTerracotta
+import com.reelblocker.app.ui.theme.ColorTerracottaWash
+import com.reelblocker.app.ui.theme.ColorWarmOffWhite
 import com.reelblocker.app.util.BatteryOptimizationHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,7 +107,7 @@ fun HomeScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(ColorWarmOffWhite)
     ) {
         // WhatsApp-like Header TopBar
         TopAppBar(
@@ -115,12 +124,13 @@ fun HomeScreen(
                             text = "ReelBlocker",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = (-0.5).sp
+                            letterSpacing = (-0.5).sp,
+                            color = ColorMatteCharcoal
                         )
                         Text(
                             text = "Mindful Social Shield",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = ColorMatteCharcoal.copy(alpha = 0.65f)
                         )
                     }
 
@@ -133,7 +143,7 @@ fun HomeScreen(
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.background
+                containerColor = ColorWarmOffWhite
             )
         )
 
@@ -181,6 +191,7 @@ fun HomeScreen(
                 text = "Protected Apps & Surfaces",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
+                color = ColorMatteCharcoal,
                 modifier = Modifier.padding(top = 4.dp, start = 4.dp)
             )
 
@@ -205,8 +216,10 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                )
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                border = BorderStroke(1.dp, ColorSoftSand)
             ) {
                 Row(
                     modifier = Modifier
@@ -218,14 +231,15 @@ fun HomeScreen(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
+                            .background(ColorTerracottaWash)
+                            .border(1.dp, ColorTerracotta.copy(alpha = 0.3f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Vibration,
                             contentDescription = null,
                             modifier = Modifier.size(22.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = ColorTerracotta
                         )
                     }
                     Spacer(modifier = Modifier.width(14.dp))
@@ -233,17 +247,24 @@ fun HomeScreen(
                         Text(
                             text = "Haptic Bump on Block",
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Bold,
+                            color = ColorMatteCharcoal
                         )
                         Text(
                             text = "Gentle vibration reminder when a reel is deflected",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = ColorMatteCharcoal.copy(alpha = 0.65f)
                         )
                     }
                     Switch(
                         checked = preferences.hapticFeedbackEnabled,
-                        onCheckedChange = { viewModel.setHapticFeedbackEnabled(it) }
+                        onCheckedChange = { viewModel.setHapticFeedbackEnabled(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = ColorHoneyOchre,
+                            uncheckedTrackColor = ColorSoftSand.copy(alpha = 0.4f),
+                            uncheckedThumbColor = Color.White
+                        )
                     )
                 }
             }
@@ -281,10 +302,10 @@ private fun HeroFocusProtectionCard(
     onSnoozeClick: () -> Unit,
     onResumeClick: () -> Unit
 ) {
-    val activeColor = MaterialTheme.colorScheme.primary
-    val snoozeColor = MaterialTheme.colorScheme.secondary
-    val scheduledColor = MaterialTheme.colorScheme.tertiary
-    val inactiveColor = MaterialTheme.colorScheme.outline
+    val activeColor = ColorTerracotta
+    val snoozeColor = ColorHoneyOchre
+    val scheduledColor = ColorHoneyOchre
+    val inactiveColor = ColorSoftSand
 
     val targetColor = when {
         isSnoozed -> snoozeColor
@@ -303,17 +324,10 @@ private fun HeroFocusProtectionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(26.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+            containerColor = Color.White
         ),
-        border = BorderStroke(
-            1.dp,
-            Brush.verticalGradient(
-                listOf(
-                    animatedAccentColor.copy(alpha = 0.5f),
-                    animatedAccentColor.copy(alpha = 0.1f)
-                )
-            )
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, ColorSoftSand)
     ) {
         Column(
             modifier = Modifier
@@ -360,7 +374,8 @@ private fun HeroFocusProtectionCard(
                                 else -> "Protection Off"
                             },
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = ColorMatteCharcoal
                         )
                         Text(
                             text = when {
@@ -370,7 +385,7 @@ private fun HeroFocusProtectionCard(
                                 else -> "Tap switch to guard your focus"
                             },
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = ColorMatteCharcoal.copy(alpha = 0.65f)
                         )
                     }
                 }
@@ -379,8 +394,10 @@ private fun HeroFocusProtectionCard(
                     checked = isMasterOn,
                     onCheckedChange = onToggle,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                        checkedTrackColor = animatedAccentColor
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = ColorTerracotta,
+                        uncheckedTrackColor = ColorSoftSand.copy(alpha = 0.4f),
+                        uncheckedThumbColor = Color.White
                     )
                 )
             }
@@ -397,8 +414,8 @@ private fun HeroFocusProtectionCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(snoozeColor.copy(alpha = 0.15f))
-                                .border(1.dp, snoozeColor.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                                .background(ColorHoneyOchreWash)
+                                .border(1.dp, ColorHoneyOchre.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
                                 .padding(horizontal = 14.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -407,7 +424,7 @@ private fun HeroFocusProtectionCard(
                                 Icon(
                                     imageVector = Icons.Filled.Timer,
                                     contentDescription = null,
-                                    tint = snoozeColor,
+                                    tint = ColorDeepHoneyOchre,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -415,15 +432,15 @@ private fun HeroFocusProtectionCard(
                                     text = "Snoozed: $timeString remaining",
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = snoozeColor
+                                    color = ColorDeepHoneyOchre
                                 )
                             }
 
                             Button(
                                 onClick = onResumeClick,
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = snoozeColor,
-                                    contentColor = Color.Black
+                                    containerColor = ColorTerracotta,
+                                    contentColor = Color.White
                                 ),
                                 shape = RoundedCornerShape(12.dp),
                                 contentPadding = ButtonDefaults.TextButtonContentPadding
@@ -436,18 +453,20 @@ private fun HeroFocusProtectionCard(
                             onClick = onSnoozeClick,
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(14.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                            border = BorderStroke(1.dp, ColorSoftSand)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.AccessTime,
                                 contentDescription = null,
+                                tint = ColorMatteCharcoal,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Take a 5-min breather (Quick Snooze)",
                                 style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
+                                color = ColorMatteCharcoal
                             )
                         }
                     }
@@ -470,17 +489,10 @@ private fun TodayImpactSnapshotCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+            containerColor = Color.White
         ),
-        border = BorderStroke(
-            1.dp,
-            Brush.horizontalGradient(
-                listOf(
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
-                )
-            )
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, ColorSoftSand)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(
@@ -492,33 +504,29 @@ private fun TodayImpactSnapshotCard(
                     Icon(
                         imageVector = Icons.Filled.TrendingUp,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = ColorTerracotta,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Today's Habit Impact",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = ColorMatteCharcoal
                     )
                 }
 
                 if (isZeroUrge) {
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFF10B981).copy(alpha = 0.2f),
-                        border = BorderStroke(
-                            1.dp,
-                            Brush.horizontalGradient(
-                                listOf(Color(0xFF10B981), Color(0xFF34D399))
-                            )
-                        )
+                        color = ColorHoneyOchreWash,
+                        border = BorderStroke(1.dp, ColorHoneyOchre.copy(alpha = 0.6f))
                     ) {
                         Text(
                             text = "⭐ Zero-Urge Mastery",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF047857),
+                            color = ColorDeepHoneyOchre,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
@@ -536,8 +544,9 @@ private fun TodayImpactSnapshotCard(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-                    )
+                        containerColor = ColorWarmOffWhite
+                    ),
+                    border = BorderStroke(1.dp, ColorSoftSand)
                 ) {
                     Column(
                         modifier = Modifier.padding(12.dp),
@@ -547,19 +556,19 @@ private fun TodayImpactSnapshotCard(
                             text = "$cleanRate%",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Black,
-                            color = if (cleanRate >= 80) Color(0xFF10B981) else MaterialTheme.colorScheme.primary
+                            color = ColorTerracotta
                         )
                         Text(
                             text = "Clean Rate",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = ColorMatteCharcoal
                         )
                         Text(
                             text = "$cleanSessions of $totalSessions visits",
                             style = MaterialTheme.typography.labelSmall,
                             fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.outline
+                            color = ColorMatteCharcoal.copy(alpha = 0.55f)
                         )
                     }
                 }
@@ -569,8 +578,9 @@ private fun TodayImpactSnapshotCard(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-                    )
+                        containerColor = ColorWarmOffWhite
+                    ),
+                    border = BorderStroke(1.dp, ColorSoftSand)
                 ) {
                     Column(
                         modifier = Modifier.padding(12.dp),
@@ -580,19 +590,19 @@ private fun TodayImpactSnapshotCard(
                             text = "$interceptedAttempts",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.primary
+                            color = ColorTerracotta
                         )
                         Text(
                             text = "Urges Deflected",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = ColorMatteCharcoal
                         )
                         Text(
                             text = "Reels bounced",
                             style = MaterialTheme.typography.labelSmall,
                             fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.outline
+                            color = ColorMatteCharcoal.copy(alpha = 0.55f)
                         )
                     }
                 }
@@ -602,8 +612,9 @@ private fun TodayImpactSnapshotCard(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-                    )
+                        containerColor = ColorWarmOffWhite
+                    ),
+                    border = BorderStroke(1.dp, ColorSoftSand)
                 ) {
                     Column(
                         modifier = Modifier.padding(12.dp),
@@ -613,19 +624,19 @@ private fun TodayImpactSnapshotCard(
                             text = "~${minutesSaved}m",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Black,
-                            color = Color(0xFF0284C7)
+                            color = ColorTerracotta
                         )
                         Text(
                             text = "Time Reclaimed",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = ColorMatteCharcoal
                         )
                         Text(
                             text = "Saved today",
                             style = MaterialTheme.typography.labelSmall,
                             fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.outline
+                            color = ColorMatteCharcoal.copy(alpha = 0.55f)
                         )
                     }
                 }
@@ -646,8 +657,10 @@ private fun InstagramProtectionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
-        )
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, ColorSoftSand)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -674,12 +687,13 @@ private fun InstagramProtectionCard(
                     Text(
                         text = "Instagram",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = ColorMatteCharcoal
                     )
                     Text(
                         text = "DMs, chats, stories & profile remain 100% accessible",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = ColorMatteCharcoal.copy(alpha = 0.65f)
                     )
                 }
             }
@@ -698,18 +712,25 @@ private fun InstagramProtectionCard(
                     Text(
                         text = "Block Reels Tab",
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = ColorMatteCharcoal
                     )
                     Text(
                         text = "Redirects dedicated Reels tab to Home feed (<20ms)",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = ColorMatteCharcoal.copy(alpha = 0.65f)
                     )
                 }
                 Switch(
                     checked = reelsEnabled && masterEnabled,
                     enabled = masterEnabled,
-                    onCheckedChange = onReelsToggle
+                    onCheckedChange = onReelsToggle,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = ColorHoneyOchre,
+                        uncheckedTrackColor = ColorSoftSand.copy(alpha = 0.4f),
+                        uncheckedThumbColor = Color.White
+                    )
                 )
             }
 
@@ -725,18 +746,25 @@ private fun InstagramProtectionCard(
                     Text(
                         text = "Block Explore Feed",
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = ColorMatteCharcoal
                     )
                     Text(
                         text = "Redirects Explore search tab to prevent algorithmic rabbit holes",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = ColorMatteCharcoal.copy(alpha = 0.65f)
                     )
                 }
                 Switch(
                     checked = exploreEnabled && masterEnabled,
                     enabled = masterEnabled,
-                    onCheckedChange = onExploreToggle
+                    onCheckedChange = onExploreToggle,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = ColorHoneyOchre,
+                        uncheckedTrackColor = ColorSoftSand.copy(alpha = 0.4f),
+                        uncheckedThumbColor = Color.White
+                    )
                 )
             }
         }
@@ -753,8 +781,10 @@ private fun YouTubeProtectionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
-        )
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, ColorSoftSand)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -777,12 +807,13 @@ private fun YouTubeProtectionCard(
                     Text(
                         text = "YouTube Shorts",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = ColorMatteCharcoal
                     )
                     Text(
                         text = "Long-form videos, search, and subscriptions remain intact",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = ColorMatteCharcoal.copy(alpha = 0.65f)
                     )
                 }
             }
@@ -800,18 +831,25 @@ private fun YouTubeProtectionCard(
                     Text(
                         text = "Block Full-Screen Shorts",
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = ColorMatteCharcoal
                     )
                     Text(
                         text = "Instantly exits infinite vertical scrolling player",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = ColorMatteCharcoal.copy(alpha = 0.65f)
                     )
                 }
                 Switch(
                     checked = shortsEnabled && masterEnabled,
                     enabled = masterEnabled,
-                    onCheckedChange = onShortsToggle
+                    onCheckedChange = onShortsToggle,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = ColorHoneyOchre,
+                        uncheckedTrackColor = ColorSoftSand.copy(alpha = 0.4f),
+                        uncheckedThumbColor = Color.White
+                    )
                 )
             }
         }
@@ -826,16 +864,17 @@ private fun HomeStatusBadge(
     isScheduled: Boolean
 ) {
     val (label, bg, fg) = when {
-        !isAccessibilityEnabled -> Triple("DISABLED", Color(0xFFEF4444).copy(alpha = 0.15f), Color(0xFFDC2626))
-        isSnoozed -> Triple("SNOOZED", MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.secondary)
-        isProtectionActive && isScheduled -> Triple("SCHEDULED", MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.tertiary)
-        isProtectionActive -> Triple("ACTIVE", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.primary)
-        else -> Triple("OFF", MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant)
+        !isAccessibilityEnabled -> Triple("DISABLED", ColorTerracottaWash, ColorTerracotta)
+        isSnoozed -> Triple("SNOOZED", ColorHoneyOchreWash, ColorDeepHoneyOchre)
+        isProtectionActive && isScheduled -> Triple("SCHEDULED", ColorHoneyOchreWash, ColorDeepHoneyOchre)
+        isProtectionActive -> Triple("ACTIVE", ColorTerracottaWash, ColorTerracotta)
+        else -> Triple("OFF", ColorSoftSandWash, ColorMatteCharcoal.copy(alpha = 0.6f))
     }
 
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = bg
+        color = bg,
+        border = BorderStroke(1.dp, ColorSoftSand.copy(alpha = 0.5f))
     ) {
         Text(
             text = label,
@@ -853,8 +892,9 @@ private fun HomeServiceRequiredCard(onEnableClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.8f)
-        )
+            containerColor = ColorTerracottaWash
+        ),
+        border = BorderStroke(1.dp, ColorTerracotta.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier
@@ -865,7 +905,7 @@ private fun HomeServiceRequiredCard(onEnableClick: () -> Unit) {
             Icon(
                 imageVector = Icons.Filled.Warning,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
+                tint = ColorTerracotta,
                 modifier = Modifier.size(28.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
@@ -874,19 +914,20 @@ private fun HomeServiceRequiredCard(onEnableClick: () -> Unit) {
                     text = "Accessibility Permission Needed",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onErrorContainer
+                    color = ColorTerracotta
                 )
                 Text(
                     text = "Required to detect and deflect short-form video tabs.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
+                    color = ColorMatteCharcoal.copy(alpha = 0.8f)
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Button(
                 onClick = onEnableClick,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
+                    containerColor = ColorTerracotta,
+                    contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -902,8 +943,9 @@ private fun HomeBatteryOptimizationCard(onFixClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.45f)
-        )
+            containerColor = ColorHoneyOchreWash
+        ),
+        border = BorderStroke(1.dp, ColorHoneyOchre.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier
@@ -914,7 +956,7 @@ private fun HomeBatteryOptimizationCard(onFixClick: () -> Unit) {
             Icon(
                 imageVector = Icons.Filled.BatteryAlert,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.tertiary,
+                tint = ColorDeepHoneyOchre,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
@@ -922,15 +964,19 @@ private fun HomeBatteryOptimizationCard(onFixClick: () -> Unit) {
                 Text(
                     text = "Background Protection",
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = ColorDeepHoneyOchre
                 )
                 Text(
                     text = "Disable battery optimization so Android doesn't put blocker to sleep",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = ColorMatteCharcoal.copy(alpha = 0.75f)
                 )
             }
-            TextButton(onClick = onFixClick) {
+            TextButton(
+                onClick = onFixClick,
+                colors = ButtonDefaults.textButtonColors(contentColor = ColorTerracotta)
+            ) {
                 Text("Fix", fontWeight = FontWeight.Bold)
             }
         }
@@ -943,8 +989,9 @@ private fun HomeRemoteKillSwitchBanner() {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = ColorTerracottaWash
+        ),
+        border = BorderStroke(1.dp, ColorTerracotta.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier
@@ -955,14 +1002,14 @@ private fun HomeRemoteKillSwitchBanner() {
             Icon(
                 imageVector = Icons.Filled.Block,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
+                tint = ColorTerracotta,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = "Emergency Kill Switch Active via Remote Config. Protection temporarily paused.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = ColorTerracotta
             )
         }
     }

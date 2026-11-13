@@ -62,6 +62,15 @@ import androidx.compose.ui.unit.sp
 import com.reelblocker.app.model.DayStat
 import com.reelblocker.app.model.HourlyWindowStat
 import com.reelblocker.app.ui.dashboard.DashboardViewModel
+import com.reelblocker.app.ui.theme.ColorDeepHoneyOchre
+import com.reelblocker.app.ui.theme.ColorHoneyOchre
+import com.reelblocker.app.ui.theme.ColorHoneyOchreWash
+import com.reelblocker.app.ui.theme.ColorMatteCharcoal
+import com.reelblocker.app.ui.theme.ColorSoftSand
+import com.reelblocker.app.ui.theme.ColorSoftSandWash
+import com.reelblocker.app.ui.theme.ColorTerracotta
+import com.reelblocker.app.ui.theme.ColorTerracottaWash
+import com.reelblocker.app.ui.theme.ColorWarmOffWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +85,7 @@ fun AnalyticsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(ColorWarmOffWhite)
     ) {
         // Top Bar
         TopAppBar(
@@ -86,17 +95,18 @@ fun AnalyticsScreen(
                         text = "Habit Dashboard",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = (-0.5).sp
+                        letterSpacing = (-0.5).sp,
+                        color = ColorMatteCharcoal
                     )
                     Text(
                         text = "Attention & Reclaimed Time",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = ColorMatteCharcoal.copy(alpha = 0.65f)
                     )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.background
+                containerColor = ColorWarmOffWhite
             )
         )
 
@@ -165,17 +175,10 @@ private fun FocusMasteryHeroCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(26.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+            containerColor = Color.White
         ),
-        border = BorderStroke(
-            1.dp,
-            Brush.linearGradient(
-                listOf(
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)
-                )
-            )
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, ColorSoftSand)
     ) {
         Column(
             modifier = Modifier
@@ -192,13 +195,14 @@ private fun FocusMasteryHeroCard(
                         modifier = Modifier
                             .size(46.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                            .background(ColorTerracottaWash)
+                            .border(1.dp, ColorTerracotta.copy(alpha = 0.3f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Filled.EmojiEvents,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = ColorTerracotta,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -208,25 +212,27 @@ private fun FocusMasteryHeroCard(
                             text = "Focus Rank",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = ColorTerracotta
                         )
                         Text(
                             text = rank,
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Black
+                            fontWeight = FontWeight.Black,
+                            color = ColorMatteCharcoal
                         )
                     }
                 }
 
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.tertiaryContainer
+                    color = ColorHoneyOchreWash,
+                    border = BorderStroke(1.dp, ColorHoneyOchre.copy(alpha = 0.5f))
                 ) {
                     Text(
                         text = "$cleanRate% Clean",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.tertiary,
+                        color = ColorDeepHoneyOchre,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
@@ -244,8 +250,9 @@ private fun FocusMasteryHeroCard(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
-                    )
+                        containerColor = ColorWarmOffWhite
+                    ),
+                    border = BorderStroke(1.dp, ColorSoftSand)
                 ) {
                     Column(
                         modifier = Modifier.padding(12.dp),
@@ -255,19 +262,19 @@ private fun FocusMasteryHeroCard(
                             text = timeFormatted,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.primary
+                            color = ColorTerracotta
                         )
                         Text(
                             text = "Time Reclaimed",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = ColorMatteCharcoal
                         )
                         Text(
                             text = "Past 7 days",
                             style = MaterialTheme.typography.labelSmall,
                             fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.outline
+                            color = ColorMatteCharcoal.copy(alpha = 0.55f)
                         )
                     }
                 }
@@ -277,8 +284,9 @@ private fun FocusMasteryHeroCard(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
-                    )
+                        containerColor = ColorWarmOffWhite
+                    ),
+                    border = BorderStroke(1.dp, ColorSoftSand)
                 ) {
                     Column(
                         modifier = Modifier.padding(12.dp),
@@ -288,19 +296,19 @@ private fun FocusMasteryHeroCard(
                             text = "$zeroUrgeDays / 7",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Black,
-                            color = Color(0xFFD97706)
+                            color = ColorTerracotta
                         )
                         Text(
                             text = "Zero-Urge Days",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = ColorMatteCharcoal
                         )
                         Text(
                             text = "⭐ Pure utility",
                             style = MaterialTheme.typography.labelSmall,
                             fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.outline
+                            color = ColorMatteCharcoal.copy(alpha = 0.55f)
                         )
                     }
                 }
@@ -310,8 +318,9 @@ private fun FocusMasteryHeroCard(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
-                    )
+                        containerColor = ColorWarmOffWhite
+                    ),
+                    border = BorderStroke(1.dp, ColorSoftSand)
                 ) {
                     Column(
                         modifier = Modifier.padding(12.dp),
@@ -321,19 +330,19 @@ private fun FocusMasteryHeroCard(
                             text = "$cleanRate%",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Black,
-                            color = Color(0xFF10B981)
+                            color = ColorTerracotta
                         )
                         Text(
                             text = "Avg Clean Rate",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = ColorMatteCharcoal
                         )
                         Text(
                             text = "Intentional visits",
                             style = MaterialTheme.typography.labelSmall,
                             fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.outline
+                            color = ColorMatteCharcoal.copy(alpha = 0.55f)
                         )
                     }
                 }
@@ -355,8 +364,10 @@ private fun WeeklyCleanRateBarChartCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-        )
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, ColorSoftSand)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(
@@ -368,14 +379,15 @@ private fun WeeklyCleanRateBarChartCard(
                     Icon(
                         imageVector = Icons.Filled.BarChart,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = ColorTerracotta,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "7-Day Clean Usage Rate",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = ColorMatteCharcoal
                     )
                 }
 
@@ -383,7 +395,7 @@ private fun WeeklyCleanRateBarChartCard(
                     text = "Goal: ≥80%",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF10B981)
+                    color = ColorDeepHoneyOchre
                 )
             }
 
@@ -392,7 +404,7 @@ private fun WeeklyCleanRateBarChartCard(
             Text(
                 text = "Measures intentional visits (DMs, posting, search) vs reflex urges. ⭐ marks days with 0 reel urges.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = ColorMatteCharcoal.copy(alpha = 0.65f)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -430,7 +442,7 @@ private fun WeeklyCleanRateBarChartCard(
                                 style = MaterialTheme.typography.labelSmall,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (cleanRate >= 80) Color(0xFF10B981) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = if (isHighlighted) ColorTerracotta else ColorMatteCharcoal.copy(alpha = 0.7f),
                                 modifier = Modifier.padding(bottom = 2.dp)
                             )
                         }
@@ -448,27 +460,10 @@ private fun WeeklyCleanRateBarChartCard(
                                     .fillMaxHeight(barHeightFraction)
                                     .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                                     .background(
-                                        if (isHighlighted) {
-                                            Brush.verticalGradient(
-                                                listOf(
-                                                    MaterialTheme.colorScheme.primary,
-                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.65f)
-                                                )
-                                            )
-                                        } else if (cleanRate >= 80) {
-                                            Brush.verticalGradient(
-                                                listOf(
-                                                    MaterialTheme.colorScheme.secondary,
-                                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.65f)
-                                                )
-                                            )
-                                        } else {
-                                            Brush.verticalGradient(
-                                                listOf(
-                                                    MaterialTheme.colorScheme.outlineVariant,
-                                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
-                                                )
-                                            )
+                                        when {
+                                            isHighlighted -> ColorTerracotta
+                                            cleanRate >= 80 -> ColorHoneyOchre
+                                            else -> ColorSoftSand
                                         }
                                     )
                             )
@@ -482,7 +477,7 @@ private fun WeeklyCleanRateBarChartCard(
                             style = MaterialTheme.typography.labelSmall,
                             fontSize = 11.sp,
                             fontWeight = if (stat.isToday) FontWeight.ExtraBold else FontWeight.Medium,
-                            color = if (stat.isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (stat.isToday) ColorTerracotta else ColorMatteCharcoal.copy(alpha = 0.7f)
                         )
                     }
                 }
@@ -503,8 +498,10 @@ private fun HourlyVulnerabilityGraphCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-        )
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, ColorSoftSand)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(
@@ -516,26 +513,28 @@ private fun HourlyVulnerabilityGraphCard(
                     Icon(
                         imageVector = Icons.Filled.Insights,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = ColorTerracotta,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Doomscroll Vulnerability Clock",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = ColorMatteCharcoal
                     )
                 }
 
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = Color(0xFFEF4444).copy(alpha = 0.15f)
+                    color = ColorTerracottaWash,
+                    border = BorderStroke(1.dp, ColorTerracotta.copy(alpha = 0.4f))
                 ) {
                     Text(
                         text = "Urge Heatmap",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFDC2626),
+                        color = ColorTerracotta,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
@@ -546,19 +545,18 @@ private fun HourlyVulnerabilityGraphCard(
             Text(
                 text = "Shows the times of day when your reflex to doomscroll is triggered most frequently.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = ColorMatteCharcoal.copy(alpha = 0.65f)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 hourlyStats.forEach { stat ->
-                    val isPeak = stat.percentage > 40 || (stat.windowName == "Night" && stat.count > 0)
-                    val barColor = when {
-                        stat.windowName == "Night" -> Color(0xFF8B5CF6)
-                        stat.windowName == "Evening" -> Color(0xFFF59E0B)
-                        stat.windowName == "Afternoon" -> Color(0xFF0284C7)
-                        else -> Color(0xFF10B981)
+                    val barColor = when (stat.windowName) {
+                        "Night" -> ColorTerracotta
+                        "Evening" -> ColorHoneyOchre
+                        "Afternoon" -> ColorDeepHoneyOchre
+                        else -> ColorSoftSand
                     }
 
                     Column {
@@ -571,13 +569,14 @@ private fun HourlyVulnerabilityGraphCard(
                                 Text(
                                     text = stat.windowName,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    color = ColorMatteCharcoal
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "(${stat.timeRange})",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = ColorMatteCharcoal.copy(alpha = 0.6f)
                                 )
                             }
 
@@ -599,7 +598,7 @@ private fun HourlyVulnerabilityGraphCard(
                                 .height(10.dp)
                                 .clip(RoundedCornerShape(6.dp)),
                             color = barColor,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            trackColor = ColorSoftSandWash,
                             strokeCap = StrokeCap.Round
                         )
                     }
@@ -613,21 +612,22 @@ private fun HourlyVulnerabilityGraphCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f))
+                    .background(ColorHoneyOchreWash)
+                    .border(1.dp, ColorHoneyOchre.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.Filled.AutoAwesome,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.tertiary,
+                    tint = ColorDeepHoneyOchre,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = "Tip: Most users relapse in the Evening & Night. Schedule your Focus Hours from 8 PM to 11 PM to guard your sleep.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                    color = ColorDeepHoneyOchre
                 )
             }
         }
@@ -649,19 +649,22 @@ private fun AppBreakdownCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-        )
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, ColorSoftSand)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Text(
                 text = "Surface Temptation Share",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = ColorMatteCharcoal
             )
             Text(
                 text = "Where attention leaks occur across your installed apps.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = ColorMatteCharcoal.copy(alpha = 0.65f)
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -675,8 +678,9 @@ private fun AppBreakdownCard(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-                    )
+                        containerColor = ColorWarmOffWhite
+                    ),
+                    border = BorderStroke(1.dp, ColorSoftSand)
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -702,7 +706,8 @@ private fun AppBreakdownCard(
                             Text(
                                 text = "Instagram",
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = ColorMatteCharcoal
                             )
                         }
 
@@ -710,13 +715,13 @@ private fun AppBreakdownCard(
                         Text(
                             text = "Reels & Explore",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = ColorMatteCharcoal.copy(alpha = 0.65f)
                         )
                         Text(
                             text = if (blockInstagramReels) "Shielded 🛡️" else "Unprotected",
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = if (blockInstagramReels) Color(0xFF10B981) else Color(0xFFEF4444)
+                            color = if (blockInstagramReels) ColorTerracotta else ColorSoftSand
                         )
                     }
                 }
@@ -726,8 +731,9 @@ private fun AppBreakdownCard(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-                    )
+                        containerColor = ColorWarmOffWhite
+                    ),
+                    border = BorderStroke(1.dp, ColorSoftSand)
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -749,7 +755,8 @@ private fun AppBreakdownCard(
                             Text(
                                 text = "YouTube",
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = ColorMatteCharcoal
                             )
                         }
 
@@ -757,13 +764,13 @@ private fun AppBreakdownCard(
                         Text(
                             text = "Shorts Player",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = ColorMatteCharcoal.copy(alpha = 0.65f)
                         )
                         Text(
                             text = if (blockYouTubeShorts) "Shielded 🛡️" else "Unprotected",
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = if (blockYouTubeShorts) Color(0xFF10B981) else Color(0xFFEF4444)
+                            color = if (blockYouTubeShorts) ColorTerracotta else ColorSoftSand
                         )
                     }
                 }
@@ -786,8 +793,10 @@ private fun HabitReconditioningCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-        )
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, ColorSoftSand)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -795,13 +804,14 @@ private fun HabitReconditioningCard(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
+                        .background(ColorTerracottaWash)
+                        .border(1.dp, ColorTerracotta.copy(alpha = 0.3f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Psychology,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = ColorTerracotta,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -810,12 +820,13 @@ private fun HabitReconditioningCard(
                     Text(
                         text = "Habit Reconditioning Model",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = ColorMatteCharcoal
                     )
                     Text(
                         text = "Why clean sessions matter more than raw blocks",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = ColorMatteCharcoal.copy(alpha = 0.65f)
                     )
                 }
             }
@@ -825,7 +836,7 @@ private fun HabitReconditioningCard(
             Text(
                 text = "When you open Instagram to answer a DM or YouTube to learn a skill, and exit without watching a single short-form video, your brain breaks the automatic dopamine loop. That visit is celebrated as a Clean Session.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = ColorMatteCharcoal.copy(alpha = 0.8f)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -834,7 +845,8 @@ private fun HabitReconditioningCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
+                    .background(ColorWarmOffWhite)
+                    .border(1.dp, ColorSoftSand, RoundedCornerShape(12.dp))
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -842,13 +854,14 @@ private fun HabitReconditioningCard(
                 Text(
                     text = "Today's Clean Habit Score",
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = ColorMatteCharcoal
                 )
                 Text(
                     text = "$cleanSessionsToday clean / $sessionsToday total visits ($cleanRate%)",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.ExtraBold,
-                    color = if (cleanRate >= 80) Color(0xFF10B981) else MaterialTheme.colorScheme.primary
+                    color = ColorTerracotta
                 )
             }
         }
